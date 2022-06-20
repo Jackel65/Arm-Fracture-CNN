@@ -1,0 +1,195 @@
+# importing the libraries
+import pandas as pd
+import numpy as np
+import os
+import helper
+# for reading and displaying images
+from skimage.io import imread
+import matplotlib.pyplot as plt
+import torchvision
+from torchvision import datasets, transforms
+import imageio
+# for creating validation set
+from sklearn.model_selection import train_test_split
+import random
+# for evaluating the model
+from sklearn.metrics import accuracy_score
+
+# PyTorch libraries and modules
+import torch
+from torch.autograd import Variable
+from torch.utils.data import Dataset, DataLoader
+import torch.nn as nn
+from torch.optim import Adam, SGD
+import glob
+from PIL import Image
+import torch.nn.functional as F
+
+##check for repeated packages
+from skimage.transform import resize
+from skimage.color import rgb2gray
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+import imageio
+
+
+
+from skimage.transform import resize
+from skimage.color import rgb2gray
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+import imageio
+
+
+
+##create it and ot
+ot=[]
+
+##make ot a list with the corresponding 0 and 1 values
+for filename in glob.glob("C:/Users/longw/Documents/neuralnets/WristFracture/Train/Fracture/*.jpg"):
+    ot.append(1)
+    
+for j in glob.glob("C:/Users/longw/Documents/neuralnets/WristFracture/Train/Normal/*.jpg"):
+    ot.append(0)
+    
+
+ot = np.array(ot)
+
+
+##create the training data array
+
+list1 = os.listdir("C:/Users/longw/Documents/neuralnets/WristFracture/Train/Fracture/")
+
+train_img = []
+
+for img_name in list1:
+    # defining the image path
+    image_path = "C:/Users/longw/Documents/neuralnets/WristFracture/Train/Fracture/" + str(img_name)
+    # reading the image
+    img = imageio.imread(image_path, as_gray=True)
+    
+    #resizeing
+    img = resize(img, (585,255), mode='constant', anti_aliasing=True)
+    #img = torch.tensor(img)
+    #img=img.flatten()
+    # appending the image into the list
+    train_img.append(img)
+    
+list2 = os.listdir("C:/Users/longw/Documents/neuralnets/WristFracture/Train/Normal/")
+    
+for img_name in list2:
+    # defining the image path
+    image_path = "C:/Users/longw/Documents/neuralnets/WristFracture/Train/Normal/" + str(img_name)
+    # reading the image
+    img = imageio.imread(image_path, as_gray=True)
+    #resizeing
+    img = resize(img, (585,255), mode='constant', anti_aliasing=True)
+    #img = torch.tensor(img)
+    #img=img.flatten()    
+    # appending the image into the list
+    train_img.append(img)
+
+# converting the list to numpy array
+train_x = np.array(train_img)
+# defining the target
+train_y = ot
+
+train_x.shape
+train_y.shape
+
+##creating the validation x and validation y
+  
+ot_test = []
+
+for filename in glob.glob("C:/Users/longw/Documents/neuralnets/WristFracture/Test/FractureTest/*.jpg"):
+    ot_test.append(1)
+
+for j in glob.glob("C:/Users/longw/Documents/neuralnets/WristFracture/Test/NormalTest/*.jpg"):
+    ot_test.append(0)
+
+ot_test = np.array(ot_test)
+
+
+list3 = os.listdir("C:/Users/longw/Documents/neuralnets/WristFracture/Test/FractureTest/")
+
+validation_img = []
+
+for img_name in list3:
+    # defining the image path
+    image_path = "C:/Users/longw/Documents/neuralnets/WristFracture/Test/FractureTest/" + str(img_name)
+    # reading the image
+    img = imageio.imread(image_path, as_gray=True)
+    #resizeing
+    img = resize(img, (585,255), mode='constant', anti_aliasing=True)
+    # appending the image into the list
+    validation_img.append(img)
+    
+list4 = os.listdir("C:/Users/longw/Documents/neuralnets/WristFracture/Test/NormalTest/")
+    
+for img_name in list4:
+    # defining the image path
+    image_path = "C:/Users/longw/Documents/neuralnets/WristFracture/Test/NormalTest/" + str(img_name)
+    # reading the image
+    img = imageio.imread(image_path, as_gray=True)
+    #resizeing
+    img = resize(img, (585,255), mode='constant', anti_aliasing=True)
+    # appending the image into the list
+    validation_img.append(img)
+
+# converting the list to numpy array
+val_x = np.array(validation_img)
+# defining the target
+val_y = ot_test
+
+
+i = 0
+plt.figure(figsize=(10,10))
+plt.subplot(221), plt.imshow(train_x[i], cmap='gray')
+plt.subplot(222), plt.imshow(train_x[i+2], cmap='gray')
+plt.subplot(223), plt.imshow(train_x[i+5], cmap='gray')
+plt.subplot(224), plt.imshow(train_x[i+10], cmap='gray')
+
+
+
+(train_x.shape, train_y.shape), (val_x.shape, val_y.shape)
+
+# converting training images into torch format
+train_x = train_x.reshape(150, 1,585,255)
+train_x  = torch.from_numpy(train_x)
+
+
+# converting the target into torch format
+train_y = train_y.astype(int);
+train_y = torch.from_numpy(train_y)
+
+# shape of training data
+train_x.shape, train_y.shape
+
+# converting validation images into torch format
+val_x = val_x.reshape(43, 1, 585, 255)
+val_x  = torch.from_numpy(val_x)
+
+# converting the target into torch format
+val_y = val_y.astype(int);
+val_y = torch.from_numpy(val_y)
+
+# shape of validation data
+val_x.shape, val_y.shape
+
+
+for item in train_x:
+    torchvision.transforms.functional.adjust_contrast(item,2)
+for item in val_x:
+    torchvision.transforms.functional.adjust_contrast(item,2)
+    
+image = train_x[20].reshape(585,255)
+
+plt.imshow(image.numpy())
+
+
+torch.save(train_x, "train_x_new.pt")
+torch.save(train_y, "train_y_new.pt")
+torch.save(val_x, "val_x_new.pt")
+torch.save(val_y, "val_y_new.pt")
